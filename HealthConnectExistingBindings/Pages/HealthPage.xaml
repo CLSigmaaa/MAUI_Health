@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="HealthConnectExistingBindings.Pages.HealthPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Health Service Test">
+    
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="20">
+            
+            <!-- Status Section -->
+            <Frame BackgroundColor="LightBlue">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Status" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="{Binding StatusMessage}" FontSize="14" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Label Grid.Column="0" Text="{Binding IsInitialized, StringFormat='Initialized: {0}'}" />
+                        <Label Grid.Column="1" Text="{Binding HasPermissions, StringFormat='Permissions: {0}'}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Current Steps Section -->
+            <Frame BackgroundColor="LightGreen">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Steps Today" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="{Binding CurrentSteps, StringFormat='{0} steps'}" 
+                           FontSize="24" 
+                           FontAttributes="Bold" 
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Action Buttons -->
+            <VerticalStackLayout Spacing="15">
+                <Button Text="Initialize Health Service" 
+                        Command="{Binding InitializeCommand}"
+                        BackgroundColor="Blue"
+                        TextColor="White" />
+                
+                <Button Text="Request Permissions" 
+                        Command="{Binding RequestPermissionsCommand}"
+                        BackgroundColor="Orange"
+                        TextColor="White"
+                        IsVisible="{Binding IsInitialized}" />
+                
+                <Button Text="Read Steps" 
+                        Command="{Binding ReadStepsCommand}"
+                        BackgroundColor="Green"
+                        TextColor="White"
+                        IsVisible="{Binding HasPermissions}" />
+                
+                <Button Text="Add 1000 Steps" 
+                        Command="{Binding AddStepsCommand}"
+                        BackgroundColor="Purple"
+                        TextColor="White"
+                        IsVisible="{Binding HasPermissions}" />
+            </VerticalStackLayout>
+
+            <!-- Instructions -->
+            <Frame BackgroundColor="LightYellow">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Instructions:" FontSize="16" FontAttributes="Bold" />
+                    <Label Text="1. Initialize the health service first" FontSize="12" />
+                    <Label Text="2. Grant permissions when prompted" FontSize="12" />
+                    <Label Text="3. Read current steps data" FontSize="12" />
+                    <Label Text="4. Add test steps and see the change" FontSize="12" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+    
+</ContentPage>
