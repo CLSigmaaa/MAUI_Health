@@ -28,5 +28,9 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>We need access to your health data to read your steps and other metrics.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>We need access to write your steps and other metrics.</string>
 </dict>
 </plist>

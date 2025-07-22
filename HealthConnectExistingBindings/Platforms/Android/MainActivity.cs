@@ -1,6 +1,9 @@
 ﻿using Android.App;
 using Android.Content.PM;
 using Android.OS;
+using AndroidX.Activity.Result;
+using AndroidX.Health.Connect.Client;
+using HealthConnectExistingBindings.Platforms.Android;
 using HealthConnectExistingBindings.Services;
 
 namespace HealthConnectExistingBindings
@@ -9,6 +12,8 @@ namespace HealthConnectExistingBindings
     public class MainActivity : MauiAppCompatActivity
     {
         private IHealthService? _healthService;
+        private ActivityResultLauncher _requestPermissionsLauncher;
+
 
         protected override void OnCreate(Bundle? savedInstanceState)
         {
@@ -16,11 +21,30 @@ namespace HealthConnectExistingBindings
 
             Console.WriteLine("MainActivity OnCreate called");
 
-            // Créer le service de santé Android
-            _healthService = HealthServiceFactory.CreateHealthService(this);
+            _requestPermissionsLauncher = RegisterForActivityResult(
+                PermissionController.CreateRequestPermissionResultContract(),
+                new PermissionResultCallback()
+            );
 
-            // Initialiser et utiliser le service
-            _ = InitializeHealthServiceAsync();
+            _healthService = HealthServiceFactory.CreateHealthService(this);
+        }
+
+        public void AskPermissions(HashSet<string> permissions)
+        {
+            var requestPermissionActivityContract = PermissionController.CreateRequestPermissionResultContract();
+            //var requestPermissions = RegisterForActivityResult(requestPermissionActivityContract, new PermissionResultCallback());
+
+            Console.WriteLine("Launching permission request...");
+
+            // Convert HashSet<string> to Java.Util.HashSet for Launch
+            var javaPermissions = new Java.Util.HashSet();
+            foreach (var perm in permissions)
+            {
+                javaPermissions.Add(perm);
+                Console.WriteLine($"Adding missing permission: {perm}");
+            }
+
+            _requestPermissionsLauncher.Launch(javaPermissions);
         }
 
         private async Task InitializeHealthServiceAsync()
@@ -40,7 +64,7 @@ namespace HealthConnectExistingBindings
                 if (!hasPermissions)
                 {
                     // Demander les permissions
-                    var permissionsGranted = await _healthService.RequestPermissionsAsync();
+                    var permissionsGranted = _healthService.RequestPermissionsAsync();
                     Console.WriteLine($"Permissions granted: {permissionsGranted}");
                 }
 

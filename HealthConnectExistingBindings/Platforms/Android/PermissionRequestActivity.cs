@@ -15,11 +15,11 @@ public class PermissionRequestActivity : Activity
         base.OnCreate(savedInstanceState);
 
         var contract = PermissionController.CreateRequestPermissionResultContract();
-        var launcher = RegisterForActivityResult(contract, new PermissionResultCallback(this));
+        //var launcher = RegisterForActivityResult(contract, new PermissionResultCallback(this));
 
-        var javaPermissions = new HashSet();
-        javaPermissions.Add("android.permission.POST_NOTIFICATIONS"); // Exemple
-        launcher.Launch(javaPermissions);
+        //var javaPermissions = new HashSet();
+        //javaPermissions.Add("android.permission.POST_NOTIFICATIONS"); // Exemple
+        //launcher.Launch(javaPermissions);
     }
 
     // Finir l'Activity apr�s r�ception du r�sultat

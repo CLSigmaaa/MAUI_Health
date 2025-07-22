@@ -98,6 +98,8 @@ namespace HealthConnectExistingBindings.ViewModels
                 StatusMessage = "Checking permissions...";
                 var hasPermissions = await _healthService.HasAllPermissionsAsync();
                 HasPermissions = hasPermissions;
+
+                Console.WriteLine($"healthviewmodel : {HasPermissions}");
                 
                 if (hasPermissions)
                 {
@@ -120,11 +122,14 @@ namespace HealthConnectExistingBindings.ViewModels
             try
             {
                 StatusMessage = "Requesting permissions...";
-                var granted = await _healthService.RequestPermissionsAsync();
+                var granted = _healthService.RequestPermissionsAsync();
+
+                Console.WriteLine($"granted : { granted}");
                 
                 if (granted)
                 {
                     await CheckPermissionsAsync();
+                    //StatusMessage = "Permissions granted successfully";
                 }
                 else
                 {

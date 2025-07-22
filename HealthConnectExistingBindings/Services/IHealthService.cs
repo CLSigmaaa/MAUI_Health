@@ -22,7 +22,7 @@ namespace HealthConnectExistingBindings.Services
         /// Demande les permissions nécessaires à l'utilisateur
         /// </summary>
         /// <returns>True si les permissions sont accordées</returns>
-        Task<bool> RequestPermissionsAsync();
+        bool RequestPermissionsAsync();
 
         /// <summary>
         /// Lit les données de pas pour aujourd'hui

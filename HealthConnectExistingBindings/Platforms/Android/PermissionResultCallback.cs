@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AndroidX.Activity.Result;
-using Android.App;
-using AndroidX.Health.Connect.Client;
+using Java.Util;    
 
 namespace HealthConnectExistingBindings.Platforms.Android
 {
@@ -13,14 +9,22 @@ namespace HealthConnectExistingBindings.Platforms.Android
     {
         public void OnActivityResult(Java.Lang.Object result)
         {
-            var activityResult = (ActivityResult)result;
-            if (activityResult.ResultCode == (int)Result.Ok)
+            if (result is ISet grantedPermissions)
             {
-                Console.WriteLine("Permissions granted.");
+                var granted = new HashSet<string>();
+                var iterator = grantedPermissions.Iterator();
+                while (iterator.HasNext)
+                {
+                    var permission = iterator.Next();
+                    if (permission is Java.Lang.String jstr)
+                        granted.Add(jstr.ToString());
+                }
+                Console.WriteLine($"Permissions accordées : {string.Join(", ", granted)}");
+                // Ici, vous pouvez vérifier si toutes les permissions attendues sont présentes
             }
             else
             {
-                Console.WriteLine("Permissions denied.");
+                Console.WriteLine($"Unexpected result type: {result?.GetType().FullName}");
             }
         }
     }

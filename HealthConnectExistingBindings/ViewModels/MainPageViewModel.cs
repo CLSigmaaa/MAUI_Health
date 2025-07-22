@@ -1,4 +1,5 @@
 using HealthConnectExistingBindings.Services;
+using Microsoft.Maui.ApplicationModel;
 using System.ComponentModel;
 
 namespace HealthConnectExistingBindings.ViewModels
@@ -69,7 +70,8 @@ namespace HealthConnectExistingBindings.ViewModels
                 if (!hasPermissions)
                 {
                     StatusMessage = "Demande des permissions...";
-                    await _healthService.RequestPermissionsAsync();
+                    //await _healthService.RequestPermissionsAsync();
+
                 }
 
                 await RefreshStepsAsync();

@@ -19,6 +19,8 @@ namespace HealthConnectExistingBindings.Platforms.Android
         private IHealthConnectClient? _healthConnectClient;
         private Activity? _activity;
 
+
+
         public enum MyCoroutineSingletons
         {
             COROUTINE_SUSPENDED,
@@ -26,6 +28,8 @@ namespace HealthConnectExistingBindings.Platforms.Android
             RESUMED
         }
 
+
+        // Make sure you added the permissions required in the android manifest otherwhise it won't work !
         private readonly HashSet<string> permissions = new HashSet<string>
         {
             HealthPermission.GetReadPermission(Kotlin.Jvm.Internal.Reflection.GetOrCreateKotlinClass(Java.Lang.Class.FromType(typeof(StepsRecord)))!),
@@ -117,7 +121,8 @@ namespace HealthConnectExistingBindings.Platforms.Android
                 }
 
                 var hasAll = permissions.All(permission => grantedSet.Contains(permission));
-                Console.WriteLine($"Has all permissions: {hasAll}");
+                
+                Console.WriteLine($"Has all permissions (here): {hasAll}");
                 return hasAll;
             }
             catch (Exception ex)
@@ -127,7 +132,7 @@ namespace HealthConnectExistingBindings.Platforms.Android
             }
         }
 
-        public async Task<bool> RequestPermissionsAsync()
+        public bool RequestPermissionsAsync()
         {
             try
             {
@@ -137,35 +142,59 @@ namespace HealthConnectExistingBindings.Platforms.Android
                     return false;
                 }
 
-                Console.WriteLine("Requesting permissions...");
+                // Récupérer les permissions déjà accordées
+                var taskCompletionSource = new TaskCompletionSource<Java.Lang.Object>();
+                var result = _healthConnectClient.PermissionController.GetGrantedPermissions(
+                    new Continuation(taskCompletionSource, default));
 
-                // Créer l'intent pour demander les permissions Health Connect
-                var requestPermissionActivityContract = PermissionController.CreateRequestPermissionResultContract();
-                
-                // Convert HashSet<string> to Java.Util.HashSet with proper type
-                 var javaPermissions = new Java.Util.HashSet();
-                foreach (var perm in permissions)
+                if (result is Java.Lang.Enum CoroutineSingletons)
                 {
-                    javaPermissions.Add(perm);
+                    MyCoroutineSingletons checkedEnum = (MyCoroutineSingletons)System.Enum.Parse(typeof(MyCoroutineSingletons), CoroutineSingletons.ToString());
+                    if (checkedEnum == MyCoroutineSingletons.COROUTINE_SUSPENDED)
+                    {
+                        Console.WriteLine("Coroutine is suspended, waiting for result...");
+                        result = taskCompletionSource.Task.GetAwaiter().GetResult();
+                    }
                 }
 
-                Console.WriteLine($"Requesting {javaPermissions.Size()} permissions...");
-                
-                // Créer l'intent pour la demande de permissions
-                var intent = requestPermissionActivityContract.CreateIntent(_activity, javaPermissions);
-                
-                if (intent != null)
+                var grantedSet = new HashSet<string>();
+                if (result is Java.Util.ISet set)
                 {
-                    Console.WriteLine("Launching permission request intent...");
-                    _activity.StartActivity(intent);
+                    var iterator = set.Iterator();
+                    while (iterator.HasNext)
+                    {
+                        var permission = iterator.Next();
+                        if (permission is Java.Lang.String jstr)
+                        {
+                            var permissionStr = jstr.ToString();
+                            grantedSet.Add(permissionStr);
+                        }
+                    }
+                }
+
+                // Change the type of 'missingPermissions' to HashSet<string> to match the expected argument type
+                var missingPermissions = new HashSet<string>(permissions.Where(p => !grantedSet.Contains(p) && !string.IsNullOrEmpty(p)));
+
+                Console.WriteLine($"Permissions manquantes : {string.Join(", ", missingPermissions)}");
+
+                if (!missingPermissions.Any())
+                {
+                    Console.WriteLine("Toutes les permissions sont déjà accordées");
+                    return true;
+                }
+
+                // Demander uniquement les permissions manquantes
+                if (_activity is MainActivity mainActivity)
+                {
+                    mainActivity.AskPermissions(missingPermissions);
+                    Console.WriteLine("Demande des permissions manquantes");
+                    return true;
                 }
                 else
                 {
-                    Console.WriteLine("Failed to create permission request intent");
+                    Console.WriteLine("Activity is not of type MainActivity");
                     return false;
                 }
-
-                return false;
             }
             catch (Exception ex)
             {
